@@ -1,36 +1,60 @@
 let currentQuestionNumber = 1; // 현재 질문 번호, 초기값은 1로 설정
 
-function loadQuestion(questionNumber) {
-    const questionTextElement = document.getElementById("questionText");
-
-    // questionNumber에 해당하는 질문 파일 로드
-    fetch(`question/question${questionNumber}/question.txt`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("질문 파일을 로드하는 중 오류 발생");
-            }
-            return response.text();
-        })
+function loadQuestionAndAnswer(questionNumber) {
+    // 질문 내용 로드
+    fetch(`https://raw.githubusercontent.com/MineTime23/OXQUIZ/master/question/question${questionNumber}/question.txt`)
+        .then(response => response.text())
         .then(question => {
-            questionTextElement.textContent = question;
-        })
-        .catch(error => {
-            console.error(error);
-            questionTextElement.textContent = "질문을 로드하지 못했습니다.";
+            document.getElementById("questionText").textContent = question;
+        });
+
+    // "O" 또는 "X" 답을 로드
+    fetch(`https://raw.githubusercontent.com/MineTime23/OXQUIZ/master/question/question${questionNumber}/answer.txt`)
+        .then(response => response.text())
+        .then(answer => {
+            // 이미지 로드
+            document.getElementById("questionImage").src = `https://raw.githubusercontent.com/MineTime23/OXQUIZ/master/question/question${questionNumber}/image.jpg`;
+
+            document.getElementById("oButton").addEventListener("click", () => {
+                if (answer.trim() === "O") {
+                    playCorrectSound();
+                } else {
+                    playWrongSound();
+                }
+                questionNumber = questionNumber +1
+                if (questionNumber === 9){
+                    questionNumber = 1
+                }
+                loadQuestionAndAnswer(questionNumber)
+            });
+
+            document.getElementById("xButton").addEventListener("click", () => {
+                if (answer.trim() === "X") {
+                    playCorrectSound();
+                } else {
+                    playWrongSound();
+                }
+                questionNumber = questionNumber +1
+                if (questionNumber === 9){
+                    questionNumber = 1
+                }
+                loadQuestionAndAnswer(questionNumber)
+            });
         });
 }
 
-function nextQuestion() {
-    // 다음 질문 번호 계산
-    currentQuestionNumber++;
-    if (currentQuestionNumber > 8) {
-        currentQuestionNumber = 1; // 8번 질문 이후 1번으로 돌아감
-    }
-    loadQuestion(currentQuestionNumber);
+// 띵동 소리 재생 함수 (구현 필요)
+function playCorrectSound() {
+    // "띵동" 소리 재생 코드를 추가
+    // 예: new Audio("correct.mp3").play();
 }
 
-// 초기 질문 로드 (1번 질문부터 시작)
-loadQuestion(currentQuestionNumber);
+// 반대 소리 재생 함수 (구현 필요)
+function playWrongSound() {
+    // "반대" 소리 재생 코드를 추가
+    // 예: new Audio("wrong.mp3").play();
+}
 
-// 질문 순환 시작 (예: 버튼 클릭 시)
-document.getElementById("nextButton").addEventListener("click", nextQuestion);
+// 페이지 로드 시 첫 번째 질문 로드
+loadQuestionAndAnswer(currentQuestionNumber);
+
